@@ -5,27 +5,38 @@ import ac from './attendanceCoin';
 import web3 from './web3';
 
 class App extends Component {
+  constructor() {
+    super();
+
+    this.state = {
+      account: '',
+      balance: 0
+    }
+  }
 
   componentDidMount() {
     ac.methods.balanceOf('0xbc148580f43b93aeea5ce7aa8e805bd6db13e8d1').call()
-      .then(response => console.log(response))
+      .then(balance => this.setState({ balance }))
       .catch(err => console.log(err))
 
     web3.eth.getAccounts()
-      .then(response => console.log(response))
+      .then(response => this.setState({ account: response[0] }))
       .catch(err => console.log(err))
   }
 
   render() {
+    console.log(this.state);
+    const address = this.state.account ? this.state.account : `Please log into MetaMask and refresh`;
     return (
       <div className="App">
         <header className="App-header">
           <img src={logo} className="App-logo" alt="logo" />
-          <h1 className="App-title">Welcome to React</h1>
+          <h1 className="App-title">Your Address: <br/>{address}</h1>
         </header>
         <p className="App-intro">
-          To get started, edit <code>src/App.js</code> and save to reload.
+          Balance: { this.state.balance } AC
         </p>
+
       </div>
     );
   }
