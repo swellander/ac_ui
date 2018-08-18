@@ -17,14 +17,16 @@ class App extends Component {
       toAddress: ''
     }
     this.handleChange = this.handleChange.bind(this);
+    this.sendCoin = this.sendCoin.bind(this);
   }
   
   sendCoin() {
     const { account, toAddress, amount } = this.state;
-    ac.methods.transfer(toAddress, amount).send({
+    ac.methods.transfer(toAddress, (amount * Math.pow(10, 18))).send({
       from: account 
     })
       .then((response) => console.log(response))
+      .catch(err => console.log(err));
   }
 
   async componentDidMount() {
@@ -88,6 +90,7 @@ class App extends Component {
 
   render() {
     const address = this.state.account ? this.state.account : `Please log into MetaMask and refresh`;
+    const balance = this.state.balance / Math.pow(10, 18);
     return (
       <div className="App">
         <header className="App-header">
@@ -95,7 +98,7 @@ class App extends Component {
           <h1 className="App-title">Your Address: <br/>{address}</h1>
         </header>
         <p className="App-intro">
-          Balance: { this.state.balance } AC
+          Balance: { balance } AC
         </p>
         
 
