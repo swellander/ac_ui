@@ -3,6 +3,9 @@ import logo from './logo.svg';
 import './App.css';
 import ac from './attendanceCoin';
 import web3 from './web3';
+import { initWebCam } from './util.js';
+import Button from 'antd/lib/button';
+import './App.css';
 
 class App extends Component {
   constructor() {
@@ -10,27 +13,47 @@ class App extends Component {
 
     this.state = {
       account: '',
-      balance: 0
+      balance: 0,
+      toAddress: ''
     }
+    this.handleChange = this.handleChange.bind(this);
+  }
+  
+  sendCoin() {
+    const { account, toAddress, amount } = this.state;
+    ac.methods.transfer(toAddress, amount).send({
+      from: account 
+    })
+      .then((response) => console.log(response))
   }
 
-  componentDidMount() {
-    ac.methods.balanceOf('0xbc148580f43b93aeea5ce7aa8e805bd6db13e8d1').call()
-      .then(balance => this.setState({ balance }))
-      .catch(err => console.log(err))
+  async componentDidMount() {
+    
+    const [account] = await web3.eth.getAccounts()
+    this.setState({ account })     
 
-    web3.eth.getAccounts()
-      .then(response => this.setState({ account: response[0] }))
-      .catch(err => console.log(err))
+    const balance = await ac.methods.balanceOf(this.state.account).call();
+    this.setState({ balance })
+      // .then(balance => {
+      //   console.log('hey')
+      //   this.setState({ balance })
+      // })
+      // .catch(err => console.log('ERROR', err))
 
+    
+
+  }
+
+  startWebCam() {
     initWebCam();
+    console.log('webCam init')
   }
 
   takeSnapshot() {
 
       var hidden_canvas = document.querySelector('canvas'),
-          video = document.querySelector('video.camera_stream'),
-          image = document.querySelector('img.photo'),
+          video = document.querySelector('video'),
+          image = document.querySelector('#snapshot'),
 
           // Get the exact size of the video element.
           width = video.videoWidth,
@@ -49,13 +72,21 @@ class App extends Component {
       // Get an image dataURL from the canvas.
       var imageDataURL = hidden_canvas.toDataURL('image/png');
 
+      //clear canvas
+      context.clearRect(0,0, width, height);
+
       // Set the dataURL as source of an image element, showing the captured photo.
       image.setAttribute('src', imageDataURL); 
 
   }
 
+  handleChange(event) {
+    this.setState({ [event.target.name]: event.target.value })
+  }
+
+  
+
   render() {
-    console.log(this.state);
     const address = this.state.account ? this.state.account : `Please log into MetaMask and refresh`;
     return (
       <div className="App">
@@ -66,12 +97,32 @@ class App extends Component {
         <p className="App-intro">
           Balance: { this.state.balance } AC
         </p>
+        
 
-        <video id='video'>
+        <video>
         </video>
+        <canvas></canvas>
+        <img id="snapshot" />
 
-        <button onClick={() => this.takeSnapShot()}>Snap</button>
 
+        <Button onClick={() => this.takeSnapshot()}>Snap</Button>
+        <Button onClick={() => this.startWebCam()}>Start Cam</Button>
+
+        <br/>
+        <hr/>
+
+        <h3>Send AC</h3>
+         
+        <label>Address: </label>
+        <input value={this.state.sendAddress} onChange={this.handleChange} type="text" name="toAddress" placeholder="0xbc148580f43b93aeea5ce7aa8e805bd6db13e8d1" size="50"/>
+        
+        <br/>
+        <br/>
+        <label>Amount: </label>
+        <input value={this.state.sendAddress} onChange={this.handleChange} type="text" name="amount" placeholder="30" />
+        <br/>
+        <br/>
+        <Button onClick={this.sendCoin}>Send</Button>
       </div>
     );
   }
@@ -80,30 +131,5 @@ class App extends Component {
 export default App;
 
 
-const initWebCam = () => {
-  navigator.getUserMedia(
-      // Options
-      {
-          video: true
-      },
-      // Success Callback
-      function(stream){
-          const video = document.getElementById('video');
-          // Create an object URL for the video stream and
-          // set it as src of our HTLM video element.
-          video.src = window.URL.createObjectURL(stream);
 
-          // Play the video element to show the stream to the user.
-          video.play();
-
-      },
-      // Error Callback
-      function(err){
-
-          // Most common errors are PermissionDenied and DevicesNotFound.
-          console.error(err);
-
-      }
-  );
-}
 
