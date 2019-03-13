@@ -66,12 +66,14 @@ class App extends Component {
 
       //gather and send account and location to admin server
       const data = { 
-        account: this.state.account, 
+        address: this.state.account, 
         longitude: position.coords.longitude,
         latitude: position.coords.latitude
       };
-      axios.post('http://localhost:3002/', data)
-        .then( response => console.log(response.data) )
+      axios.post('http://localhost:5000/', data)
+        .then( response => {
+          console.log(response.data) 
+        })
         .catch( err => console.log(err));
     })
   }
