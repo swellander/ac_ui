@@ -2,3 +2,8 @@
 repoGate:
   chainId: 137
   tokenAddress: '0x9CA6a77C8B38159fd2dA9Bd25bc3E259C33F5E39'
+
+# Configuration for Repo Gate
+repoGate:
+  chainId: 137
+  tokenAddress: '0x9CA6a77C8B38159fd2dA9Bd25bc3E259C33F5E39'
